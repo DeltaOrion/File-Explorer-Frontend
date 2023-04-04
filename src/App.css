@@ -1,38 +1,298 @@
-.App {
-  text-align: center;
+/* Define all variables */
+:root {
+  --main-background-color: #33404D;
+  --font-color-main: #CAD1D8;
+  --nav-background: #1F2933;
+  --panel-background: #3F4D5A;
+  --file-panel-height: 50px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app {
   min-height: 100vh;
+  margin: 0;
+}
+
+/* Styling for the top navigatgion panel */
+
+.top-nav {
+  width: 100%;
+  text-align: center;
+  background-color: var(--nav-background);
+  margin: 0;
+  height: 60px;
+  inset: 0;
+  position: fixed;
+}
+
+.app-name {
+  color: var(--font-color-main);
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: auto;
+  margin: 0;
+}
+
+/* Generic Styling Related to a page */
+
+.page {
+  background-color: var(--main-background-color);
+  padding: 20px;
+  margin-top: 50px;
+  min-height: 100vh;
+}
+
+.file-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+/* Styling related to the file displaky screen */
+
+.file-display {
+  width: 70%;
+  margin: 20px;
+  max-width: 1200px;
+}
+
+/* Display Header */
+.file-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-left: 15px;
+  padding-bottom: 15px;
+}
+
+.file-grid {
+  width: 100%;
+  background-color: var(--panel-background);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Header Path text */
+
+.path-display-container {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.path-text {
+  color: var(--font-color-main);
+  font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-text a {
+  color: var(--font-color-main);
+}
+
+.path-text a:hover {
+  color: #ffffff;
+  font-size: 105%;
+}
+
+/* Styling related to the button panel */
+
+.manipulation-button {
+  padding: 6px 10px;
+  border: none;
   color: white;
+  border-radius: 3px;
+  margin: 0;
+  margin-left: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+.button-panel {
+  white-space: nowrap;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+/* Display information for individual panel */
+
+.file-panel {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  height: var(--file-panel-height);
+  border: 1px solid var(--nav-background);
+  width: 100%;
+}
+
+.file-panel:hover {
+  background-color: rgb(81,95,108);
+}
+
+
+.file-info {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Namespace*/
+
+.file-namespace {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  height: 100%;
+  color: var(--font-color-main);
+  font-weight: bold;
+  overflow: hidden;
+}
+
+.icon-container {
+  height: var(--file-panel-height);
+  min-width: var(--file-panel-height);
+  overflow: hidden;
+  align-content: center;
+  text-align: center;
+  margin: 0px 15px;
+}
+
+.namespace-icon {
+  height: 50%;
+  width: 50%;
+  margin-top: 25%;
+}
+
+/* Meta information */
+
+.file-meta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: end;
+}
+
+@media (max-width: 900px) {
+  .file-meta {
+    display: none;
   }
 }
+
+
+.meta-text {
+  margin: 0 10px;
+  color: var(--font-color-main);
+  font-size: 14px;
+}
+
+.file-name-container {
+  overflow: hidden;
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Specifications for the file-name itself when it is being edited */
+input.file-name {
+  background-color: var(--main-background-color);
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* Styling Related to the editable */
+
+/* Shadow element which is used to calculate the width of the */
+.editable-shadow {
+  position: absolute;
+  white-space: pre;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  /* Ensure the shadow element has the same font styles as the input element */
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Dropdown Menu */
+
+.file-dropdown-button {
+  margin: 0;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.file-dropdown-button:hover {
+  cursor: pointer;
+}
+
+.file-dropdown-button-image {
+  object-fit: cover;
+  width: 60%;
+  height: 60%;
+}
+
+/* Styling related to the dropdown */
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+}
+
+.dropdown-container {
+  margin-top: 5px;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 4px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  width: 150px;
+}
+
+/* Styling regarding dropdown items */
+
+.dropdown-element {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 40px;
+}
+
+.dropdown-element:hover {
+  cursor: pointer;
+  background-color: #eee;
+}
+
+/* Styling for each dropdown element*/
+.dropdown-icon {
+  height: 50%;
+  aspect-ratio: 1 / 1;
+  margin: 0px 15px;
+}
+
+.dropdown-text {
+  flex: 1;
+  padding: 5px 0;
+  text-decoration: none;
+  color: #333;
+}
+
+.dropdown-container a:hover {
+  background-color: #f1f1f1;
+}
+

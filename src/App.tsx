@@ -1,25 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
+import FileExplorerPage from './pages/FileExplorerPage';
+import NoPage from './pages/NoPage';
 
 function App() {
+
+  //react router, we want to swap out the page depending on the link
+  //page
+  // -> files
+  //    ->  path
+  //
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className='app'>
+        {/** Top Navbar  */}
+        <nav className='top-nav'>
+          <h1 className='app-name'>My File System</h1>
+        </nav>
+        {/** Main Page - file explorer in this case */}
+        <div className='page'>
+          <Routes>
+            <Route path="/explorer/*" element={<FileExplorerPage currPath='/explorer' />} />
+            
+            {/* Simply have one routing path for convenience now 
+            <Route path="*" element={<NoPage />} />
+            */}
+          </Routes>
+        </div >
+      </div>
+    </BrowserRouter>
   );
 }
 
