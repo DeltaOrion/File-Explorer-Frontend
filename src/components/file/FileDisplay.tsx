@@ -1,9 +1,11 @@
+import { CreateToastFnReturn, useToast } from "@chakra-ui/react";
 import {
   faFileImport,
   faPen,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useRef, useState } from "react";
+import FileSystem from "../../object/FileSystem";
 import FileType from "../../object/FileType";
 import iFile from "../../object/iFile";
 import InlineEditable from "../generic/InlineEditable";
@@ -12,21 +14,21 @@ import FileManipulationDropdown, {
   ManipulationElement,
 } from "./FileManipulationDropdown";
 import FileTypeIcon from "./FileTypeIcon";
-import FileSystem from "../../object/FileSystem";
-import { useToast } from "@chakra-ui/react";
-import { rename } from "fs";
 
 interface FileDisplayProps {
   file: iFile;
   parent: FileSystem;
   setWorkingDirectory: (append: string) => void;
+  removeFile: (file: iFile) => void;
   rename?: boolean;
 }
 
 function FileDisplay(props: FileDisplayProps) {
   //use state for updating this displaky
   const [file, setFile] = useState<iFile>(props.file);
-  const [editing, setEditing] = useState<boolean>(props.rename === undefined ? false : props.rename);
+  const [editing, setEditing] = useState<boolean>(
+    props.rename === undefined ? false : props.rename
+  );
   const propagation = useRef(false);
   const toast = useToast();
 
@@ -79,6 +81,22 @@ function FileDisplay(props: FileDisplayProps) {
     });
   };
 
+  const handleDelete = (promise: Promise<FileSystem>) => {
+    promise
+      .then((file) => {
+        props.removeFile(file.asFile());
+      })
+      .catch((error) => {
+        toast({
+          title: "Unable to delete file.",
+          description: error,
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+        });
+      });
+  };
+
   return (
     <div className="file-panel">
       <div className="file-info" onClick={onClicked}>
@@ -106,7 +124,13 @@ function FileDisplay(props: FileDisplayProps) {
         button={(onClicked) => {
           return <FileManipulationButton onClick={onClicked} color="#CAE1D8" />;
         }}
-        elements={getElements(file, setFile, setEditing)}
+        elements={getElements(
+          file,
+          props.parent,
+          setFile,
+          handleDelete,
+          setEditing
+        )}
       />
     </div>
   );
@@ -114,7 +138,9 @@ function FileDisplay(props: FileDisplayProps) {
 
 function getElements(
   file: iFile,
+  fileSystem: FileSystem,
   setFile: (file: iFile) => void,
+  handleDelete: (promise: Promise<FileSystem>) => void,
   setEditing: (editing: boolean) => void
 ): ManipulationElement[] {
   const elements: ManipulationElement[] = [
@@ -132,7 +158,10 @@ function getElements(
       icon: faFileImport,
     },
     {
-      action: () => {},
+      action: () => {
+        const promise = fileSystem.deleteFile(file.name);
+        handleDelete(promise);
+      },
       name: "Delete",
       icon: faTrash,
     },

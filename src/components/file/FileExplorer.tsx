@@ -1,5 +1,5 @@
 import { Spinner } from "@chakra-ui/react";
-import { Ref, useEffect, useRef, useState } from 'react';
+import { Ref, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FileSystem from "../../object/FileSystem";
 import FileType from "../../object/FileType";
@@ -7,6 +7,7 @@ import iFile from "../../object/iFile";
 import FileDisplay from "./FileDisplay";
 import ManipulationButton from "./ManipulationButton";
 import PathDisplay from "./PathDisplay";
+import { noAuto } from "@fortawesome/fontawesome-svg-core";
 
 interface FileExplorerProps {
   system: FileSystem;
@@ -54,7 +55,7 @@ function FileExplorer(props: FileExplorerProps) {
   //this is potentially blocking so we should do async
   const loadFiles = async () => {
     setTimeout(() => {
-      const loadedNode = getCurrentNode(fileSpace,props.workingDirectory);
+      const loadedNode = getCurrentNode(fileSpace, props.workingDirectory);
       if (!loadedNode) {
         fileSpace.error = true;
         setLoading(false);
@@ -74,11 +75,20 @@ function FileExplorer(props: FileExplorerProps) {
     }, 1000);
   };
 
+  const removeFile = (file: iFile) => {
+    for (let i = 0; i < fileSpace.loadedFiles.length; i++) {
+      if (fileSpace.loadedFiles[i].name === file.name) {
+        fileSpace.loadedFiles.splice(i, 1);
+        setFileSpace({ ...fileSpace });
+        return;
+      }
+    }
+  };
+
   //attach the function to the useEffect hook.
   //this should be called
   // - 1) at the start
   // - 2) when the location changes
-
 
   useEffect(() => {
     editing.current = null;
@@ -89,7 +99,7 @@ function FileExplorer(props: FileExplorerProps) {
   //logic to add a file or folder
   //file system can handle the logic to creating
   const createFile = () => {
-    createNode(FileType.FILE);  
+    createNode(FileType.FILE);
   };
 
   const createFolder = () => {
@@ -100,20 +110,21 @@ function FileExplorer(props: FileExplorerProps) {
   //then update the file browser accordingly
 
   const createNode = async (type: FileType) => {
-
     const promise = fileSpace.fileSystem
       .getNode(constructPath(props.workingDirectory))
       ?.createFile(type);
     if (!promise) return;
 
-    promise.then((file) => {
-      insertFile(fileSpace.loadedFiles,file.asFile());
-      console.log("Set Editing State Change");
-      editing.current = file.asFile().name;
-      setFileSpace({...fileSpace});
-    }).catch(error => {
-      alert(error);
-    });
+    promise
+      .then((file) => {
+        insertFile(fileSpace.loadedFiles, file.asFile());
+        console.log("Set Editing State Change");
+        editing.current = file.asFile().name;
+        setFileSpace({ ...fileSpace });
+      })
+      .catch((error) => {
+        alert(error);
+      });
   };
 
   return (
@@ -146,7 +157,10 @@ function FileExplorer(props: FileExplorerProps) {
             props.workingDirectory,
             setWorkingDirectory,
             editing.current,
-            (val) => {editing.current = val}
+            (val) => {
+              editing.current = val;
+            },
+            removeFile
           )
         }
       </div>
@@ -160,7 +174,8 @@ function getGrid(
   workingDirectory: string[],
   setWorkingDirectory: (path: string) => void,
   editing: string | null,
-  setEditing: (val: string | null) => void, 
+  setEditing: (val: string | null) => void,
+  removeFile: (file: iFile) => void
 ): import("react").ReactNode {
   if (loading) {
     //if we are still loading return a loading spinner
@@ -187,20 +202,33 @@ function getGrid(
   //otherwise return the loaded files listed
   return fileSpace.loadedFiles.map((file, index, files) => {
     let isEditing = false;
-    if(file.name == editing) {
+    if (file.name == editing) {
       isEditing = true;
     }
-
-    return (
-      <FileDisplay key={file.name} rename={isEditing} setWorkingDirectory={setWorkingDirectory} file={file} parent={getCurrentNode(fileSpace,workingDirectory)} />
-    );
+    const node = getCurrentNode(fileSpace, workingDirectory);
+    if (node) {
+      return (
+        <FileDisplay
+          key={file.name}
+          rename={isEditing}
+          setWorkingDirectory={setWorkingDirectory}
+          file={file}
+          removeFile={removeFile}
+          parent={node}
+        />
+      );
+    }
   });
 }
 
-function getCurrentNode(fileSpace: FileSpace, workingDirectory: string[]): FileSystem {
-  const fileSystem = fileSpace.fileSystem.getNode(constructPath(workingDirectory));
-  if(!fileSystem)
-    throw new Error();
+function getCurrentNode(
+  fileSpace: FileSpace,
+  workingDirectory: string[]
+): FileSystem | null {
+  const fileSystem = fileSpace.fileSystem.getNode(
+    constructPath(workingDirectory)
+  );
+  if (!fileSystem) return null;
 
   return fileSystem;
 }

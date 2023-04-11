@@ -132,14 +132,13 @@ class ObjectFileSystem implements FileSystem {
 
   deleteFile(name: string): Promise<FileSystem> {
     return new Promise((resolve,reject) => {
-      const node = this.root.getChild(name);
+      const node = this.root.removeChild(name);
       if(!node) {
           reject("This file does not exist");
           return;
       }
 
-      
-      resolve(node);
+      resolve(new ObjectFileSystem(node));
     });
   }
 
@@ -223,6 +222,18 @@ class FileNode {
         return node;
       }
     }
+    return null;
+  }
+
+  public removeChild(name: string): FileNode | null {
+    for(let i=0;i<this.children.length;i++) {
+      const node = this.children[i];
+      if(node.getName() == name) {
+        this.children.splice(i,1);
+        return node;
+      }
+    }
+
     return null;
   }
 
