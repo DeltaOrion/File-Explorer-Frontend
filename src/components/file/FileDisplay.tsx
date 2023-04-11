@@ -1,4 +1,4 @@
-import { CreateToastFnReturn, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import {
   faFileImport,
   faPen,
@@ -6,7 +6,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useRef, useState } from "react";
 import FileSystem from "../../object/FileSystem";
-import FileType from "../../object/FileType";
 import iFile from "../../object/iFile";
 import InlineEditable from "../generic/InlineEditable";
 import FileManipulationButton from "./FileManipulationButton";
@@ -18,9 +17,17 @@ import FileTypeIcon from "./FileTypeIcon";
 interface FileDisplayProps {
   file: iFile;
   parent: FileSystem;
-  setWorkingDirectory: (append: string) => void;
+  onClicked(
+    event: React.MouseEvent,
+    iFile: iFile,
+    index: number,
+    isPropagating: boolean,
+    setPropagating: (prop: boolean) => void
+  ): void;
   removeFile: (file: iFile) => void;
   rename?: boolean;
+  selected: boolean;
+  index: number;
 }
 
 function FileDisplay(props: FileDisplayProps) {
@@ -36,36 +43,31 @@ function FileDisplay(props: FileDisplayProps) {
 
   //when the user clicks if it is a directory it should change the working directory
   const onClicked = (event: React.MouseEvent) => {
-    if (file.type == FileType.FOLDER) {
-      //If the user is editing and the click on the editable
-      //it should not move to the next folder
-      if (propagation.current) {
-        propagation.current = false;
-        return;
-      }
-
-      if (editing) return;
-
-      handleDirectoryClick(file, props.setWorkingDirectory);
-    } else {
-      handleFileClick(file);
-    }
+    props.onClicked(event, file,props.index, propagation.current, (bool: boolean) => {
+      propagation.current = bool;
+    });
   };
 
+  //when the user clicks outside or presses enter
   const onRenameFinish = (
     value: string,
     mouseDown: boolean
   ): Promise<boolean> => {
     //perform client side validation on the name
     if (mouseDown) propagation.current = true;
+
+    //try to rename from the server
     return new Promise<boolean>((resolve, reject) => {
+      //rename the file in the parent directory
       props.parent
         .renameFile(file.name, value)
         .then((fileSystem) => {
+          //if it succeeds update this name
           file.name = fileSystem.getName();
           resolve(true);
         })
         .catch((error) => {
+          //if we get an error then spawn a toast bar instead
           toast({
             title: "Unable to rename file.",
             description: error,
@@ -76,6 +78,7 @@ function FileDisplay(props: FileDisplayProps) {
           resolve(false);
         })
         .finally(() => {
+          //stop editing this tile
           setEditing(false);
         });
     });
@@ -98,7 +101,7 @@ function FileDisplay(props: FileDisplayProps) {
   };
 
   return (
-    <div className="file-panel">
+    <div className={`file-panel${props.selected ? " selected" : ""}`}>
       <div className="file-info" onClick={onClicked}>
         {/* Left side is the namespace - icon + name */}
         <div className="file-namespace">

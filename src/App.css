@@ -125,6 +125,10 @@
   width: 100%;
 }
 
+.selected {
+  background-color: rgb(81,95,108);
+}
+
 .file-panel:hover {
   background-color: rgb(81,95,108);
 }
